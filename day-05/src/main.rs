@@ -30,7 +30,7 @@ impl CrateYard {
         let from: &mut Vec<char> = self.borrow_mut().0[instruction.from - 1].borrow_mut();
 
         let from_index = from.len().checked_sub(instruction.amount).unwrap_or(0);
-        let removed: Vec<char> = from.drain(from_index..from.len()).rev().collect();
+        let removed: Vec<char> = from.drain(from_index..from.len()).collect();
 
         let to: &mut Vec<char> = self.borrow_mut().0[instruction.to - 1].borrow_mut();
         to.extend(removed);
