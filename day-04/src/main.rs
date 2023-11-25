@@ -24,13 +24,20 @@ impl<T> Range<T>
 where
     T: PartialOrd<T>,
 {
-    fn fully_overlaps(&self, other: &Range<T>) -> bool {
-        self.from <= other.from && self.to >= other.to
+    fn contains(&self, value: &T) -> bool {
+        self.from <= *value && *value <= self.to
+    }
+
+    fn partially_overlaps(&self, other: &Range<T>) -> bool {
+        self.contains(&other.from)
+            || self.contains(&other.to)
+            || other.contains(&self.from)
+            || other.contains(&self.to)
     }
 }
 
 fn main() {
-    let full_overlaps = INPUT
+    let partial_overlaps = INPUT
         .lines()
         .filter_map(|range_definitions| {
             let (left, right) = range_definitions
@@ -42,13 +49,13 @@ fn main() {
                 Range::<u32>::try_from(right).expect("right input to be correct"),
             );
 
-            if left.fully_overlaps(&right) || right.fully_overlaps(&left) {
+            if left.partially_overlaps(&right) {
                 Some(())
             } else {
                 None
             }
         })
         .count();
-    
-    dbg!(full_overlaps);
+
+    dbg!(partial_overlaps);
 }
