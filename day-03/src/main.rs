@@ -28,7 +28,7 @@ fn main() {
                 .map(|rucksack| {
                     rucksack
                         .chars()
-                        .fold(0 as u64, |acc, item| acc | 1 << item.priority_score())
+                        .fold(0_u64, |acc, item| acc | 1 << item.priority_score())
                 })
                 // and the bit mask to find the item thats in every rucksack
                 .fold(u64::MAX, |acc, current| acc & current)

@@ -65,7 +65,7 @@ impl Choice {
 impl TryFrom<&str> for Game {
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let (oppenent_move, result) = value.split_once(' ').ok_or_else(|| "couldnt split")?;
+        let (oppenent_move, result) = value.split_once(' ').ok_or("couldnt split")?;
 
         let opponent_move = Choice::try_from(oppenent_move)?;
         let result = GameResult::try_from(result)?;
