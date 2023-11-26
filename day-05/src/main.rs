@@ -6,10 +6,8 @@ use std::{
 use nom::{
     branch::alt,
     bytes::complete::{tag, take},
-    character::is_alphabetic,
     combinator::map,
-    multi::{many1, separated_list1},
-    number,
+    multi::{separated_list1},
     sequence::{delimited, preceded, tuple},
     Finish, IResult, Parser,
 };
@@ -29,7 +27,7 @@ impl CrateYard {
     fn apply(&mut self, instruction: &Instruction) {
         let from: &mut Vec<char> = self.borrow_mut().0[instruction.from - 1].borrow_mut();
 
-        let from_index = from.len().checked_sub(instruction.amount).unwrap_or(0);
+        let from_index = from.len().saturating_sub(instruction.amount);
         let removed: Vec<char> = from.drain(from_index..from.len()).collect();
 
         let to: &mut Vec<char> = self.borrow_mut().0[instruction.to - 1].borrow_mut();
@@ -61,8 +59,8 @@ impl Display for CrateYard {
 fn main() {
     let (mut crate_yard, instructions) = parse_input(INPUT).expect("input to be correct");
 
-    for instruction in instructions.into_iter() {
-        crate_yard.apply(&instruction);
+    for instruction in instructions.iter() {
+        crate_yard.apply(instruction);
     }
 
     println!("{}", crate_yard);
@@ -88,7 +86,7 @@ fn transpose_yard<T>(v: Vec<Vec<Option<T>>>) -> Vec<Vec<T>> {
 fn parse_input(input: &str) -> Result<(CrateYard, Box<[Instruction]>), ()> {
     let (crate_yard, instructions) = input.split_once("\n\n").ok_or(())?;
 
-    let (input, crate_yard) = parse_crate_yard(crate_yard).expect("valid crate yard");
+    let (_input, crate_yard) = parse_crate_yard(crate_yard).expect("valid crate yard");
 
     let crate_yard = CrateYard(transpose_yard(crate_yard).into_boxed_slice());
 
@@ -108,7 +106,7 @@ fn parse_crate_row(input: &str) -> IResult<&str, Vec<Option<char>>> {
 }
 
 fn parse_crate_or_none(input: &str) -> IResult<&str, Option<char>> {
-    alt((map(parse_crate, |c| Some(c)), map(parse_none, |_| None)))(input)
+    alt((map(parse_crate, Some), map(parse_none, |_| None)))(input)
 }
 
 fn parse_none(input: &str) -> IResult<&str, &str> {
